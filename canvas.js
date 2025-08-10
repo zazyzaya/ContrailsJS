@@ -23,19 +23,60 @@ let d_radii_sum = new Array(N_DOTS).fill(0)
 let mouseX = 0;
 let mouseY = 0;
 
+const CONTRAST = 2.5; 
+let clouds, cloud_data; 
+const cloudCanvas = document.createElement('canvas');
+const cloudCtx = cloudCanvas.getContext('2d');
+
 function clearCanvas() { 
     //ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    ctx.fillStyle = "#3ec5ffff"; 
+    ctx.beginPath(); 
+    ctx.fillStyle = "rgba(62, 197, 255, 1.0)"; 
     ctx.rect(0,0, canvas.width, canvas.height); 
     ctx.fill(); 
-    //const img = document.getElementById('background')
-    //ctx.drawImage(img, 0,0); 
+
+    // Only calcuate once 
+    // TODO recalc on resize 
+    if (clouds == null) {
+        clouds = cloudCtx.createImageData(canvas.width, canvas.height); 
+        
+        cloud_data = new Array(); 
+        for (let y=0; y<canvas.height; y++) {
+            cloud_data[y] = new Array(canvas.width).fill(0); 
+        }
+
+        fractal_cloud(cloud_data)
+        let dataIndex = 0; 
+        for (let y=0; y<cloud_data.length; y++) {
+            for (let x=0; x<cloud_data[0].length; x++) {
+                const px = cloud_data[y][x]; 
+
+                let processed_px; 
+                if (px < (1/CONTRAST)) {
+                    processed_px = 0; 
+                } else {
+                    processed_px = (px - (1/CONTRAST)) * CONTRAST; 
+                }
+
+                clouds.data[dataIndex++] = 255; 
+                clouds.data[dataIndex++] = 255; 
+                clouds.data[dataIndex++] = 255; 
+                clouds.data[dataIndex++] = processed_px * 255; 
+            }
+        }
+        cloudCtx.putImageData(clouds, 0,0); 
+    }
+
+    ctx.drawImage(cloudCanvas, 0,0); 
+
 }
 
 // Function to resize the canvas
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    cloudCanvas.width = canvas.width;
+    cloudCanvas.height = canvas.height;
 }
 
 function calcDists() {
@@ -196,16 +237,16 @@ function init() {
         }
     }
     
-    window.addEventListener("resize", resizeCanvas);
-
+    window.addEventListener("resize", resizeCanvas); 
     canvas.addEventListener("mousemove", (event) => {
         mouseX = event.clientX;
         mouseY = event.clientY;
-
-        animate();
     });
+
+    resizeCanvas();
+    init_perlin(canvas.width, canvas.height, 64);
+    clearCanvas(); 
+    animate();
 }
 
-resizeCanvas();
-clearCanvas(); 
 document.addEventListener("DOMContentLoaded", () => { init(); } ); 
