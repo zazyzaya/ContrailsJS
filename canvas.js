@@ -259,6 +259,17 @@ function animate() {
     }
 }
 
+function update_mouse(event) {
+    // Check if it's a touch event
+    if (event.touches && event.touches.length > 0) {
+        mouseX = event.touches[0].clientX;
+        mouseY = event.touches[0].clientY;
+    } else {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+    }
+}
+
 function init() { 
     for (let i=0; i<N_DOTS; i++) {
         let d_radii = new Array(N_DOTS).fill(0); 
@@ -270,10 +281,8 @@ function init() {
     }
     
     window.addEventListener("resize", resizeCanvas); 
-    window.addEventListener("mousemove", (event) => {
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-    });
+    window.addEventListener("mousemove", update_mouse);
+    window.addEventListener("touchmove", update_mouse, { passive: true });
 
     resizeCanvas();
     init_perlin(canvas.width, canvas.height, 64);
