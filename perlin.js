@@ -77,20 +77,22 @@ function point_perlin(xp,yp, x,y, octave=0) {
     return (l3 + 1) / 2;
 }
 
-function perlin(bmp) {
-    for (y=0; y<bmp.length; y++) {
+function perlin(bmp, start_x=0, start_y=0) {
+    for (let y=start_y; y<bmp.length; y++) {
         let y_point = Math.floor(y/unit_size[0]);
 
-        for (x=0; x<bmp[y].length; x++) { 
+        for (let x=start_x; x<bmp[y].length; x++) { 
             let x_point = Math.floor(x/unit_size[0]);
             bmp[y][x] = point_perlin(x_point,y_point, x,y, 0)
         }
     }
 }
 
-function fractal_cloud(bmp) {
-    for (let y=0; y<bmp.length; y++) {
-        for (let x=0; x<bmp[0].length; x++) {
+function fractal_cloud(bmp, start_x=0, start_y=0, end_y=null) {
+    if (end_y == null) { end_y = bmp.length; }
+
+    for (let y=start_y; y<end_y; y++) {
+        for (let x=start_x; x<bmp[0].length; x++) {
             for (let o=0; o<gradient.length; o++) {
                 let y_point = Math.floor(y/unit_size[o]);
                 let x_point = Math.floor(x/unit_size[o]);

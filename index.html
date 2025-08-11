@@ -8,8 +8,13 @@
 </head>
 <body>
     <img src="img/birds-eye.png" id="background" style="display: none">
-    <img src="img/plane.png" id="plane" style="display: none"> 
     <canvas id="canvas"></canvas>
+    <div id="toolbar">
+        <img class="plane-icon" src="img/cesna.png" id="cesna" onclick='change_selection("cesna")'>
+        <img class="plane-icon" src="img/plane.png" id="plane" onclick='change_selection("plane")'>
+        <img class="plane-icon" src="img/f35.png" id="f35" onclick='change_selection("f35")'>
+        <img class="plane-icon" src="img/blackbird.png" id="blackbird" onclick='change_selection("blackbird")'>
+    </div>
     <script src="perlin.js"></script>
     <script src="canvas.js"></script>
 </body>

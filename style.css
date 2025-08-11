@@ -13,6 +13,24 @@ body, html {
 canvas {
     display: block;
     background-color: #f0f0f0;
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    z-index: 0;
     width: 100%;
     height: 100%;
+}
+
+#toolbar {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    z-index: 5; 
+    pointer-events: auto;
+    margin-left: 5px; 
+}
+
+.plane-icon {
+    width: 40px; 
 }

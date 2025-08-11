@@ -22,33 +22,55 @@ let d_radii_sum = new Array(N_DOTS).fill(0)
 
 let mouseX = 0;
 let mouseY = 0;
+let selection = "cesna"; 
+function change_selection(s) {
+    selection=s; 
+}
 
 const CONTRAST = 2.5; 
-let clouds, cloud_data; 
+let clouds, cloud_data = []; 
 const cloudCanvas = document.createElement('canvas');
 const cloudCtx = cloudCanvas.getContext('2d');
+let resize_clouds = true
 
 function clearCanvas() { 
     //ctx.clearRect(0, 0, canvas.width, canvas.height); 
     ctx.beginPath(); 
     ctx.fillStyle = "rgba(62, 197, 255, 1.0)"; 
-    ctx.rect(0,0, canvas.width, canvas.height); 
-    ctx.fill(); 
+    ctx.fillRect(0,0, canvas.width, canvas.height);  
 
     // Only calcuate once 
     // TODO recalc on resize 
-    if (clouds == null) {
+    if (resize_clouds) {
         clouds = cloudCtx.createImageData(canvas.width, canvas.height); 
         
-        cloud_data = new Array(); 
+        let y_st = cloud_data.length;
+        let x_st = (cloud_data.length == 0) ? 0 : cloud_data[0].length;  
         for (let y=0; y<canvas.height; y++) {
-            cloud_data[y] = new Array(canvas.width).fill(0); 
+            if (y < y_st) {
+                let x = x_st; 
+                while (x < canvas.width) {
+                    cloud_data[y][x++] = 0;
+                }
+            }
+            else {
+                cloud_data[y] = new Array(canvas.width).fill(0); 
+            }
         }
 
-        fractal_cloud(cloud_data)
-        let dataIndex = 0; 
-        for (let y=0; y<cloud_data.length; y++) {
-            for (let x=0; x<cloud_data[0].length; x++) {
+        /*          x_st  canvas.width
+            +--------+---+
+            |  pre-  |   |
+            | filled |   |
+            +________+___+  y_en
+            |            |
+            +____________+  en_y 
+        */ 
+        fractal_cloud(cloud_data, start_x=x_st, start_y=0, end_y=y_st);
+        fractal_cloud(cloud_data, start_x=0, start_y=y_st) // If first render y_st == canvas.height
+
+        for (let y=0; y<canvas.height; y++) {
+            for (let x=0; x<canvas.width; x++) {
                 const px = cloud_data[y][x]; 
 
                 let processed_px; 
@@ -58,6 +80,7 @@ function clearCanvas() {
                     processed_px = (px - (1/CONTRAST)) * CONTRAST; 
                 }
 
+                let dataIndex = (y * canvas.width + x) * 4;
                 clouds.data[dataIndex++] = 255; 
                 clouds.data[dataIndex++] = 255; 
                 clouds.data[dataIndex++] = 255; 
@@ -65,6 +88,7 @@ function clearCanvas() {
             }
         }
         cloudCtx.putImageData(clouds, 0,0); 
+        resize_clouds = false; 
     }
 
     ctx.drawImage(cloudCanvas, 0,0); 
@@ -77,6 +101,14 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
     cloudCanvas.width = canvas.width;
     cloudCanvas.height = canvas.height;
+
+    if (!resize_clouds && (
+            canvas.height != cloud_data.length || 
+            canvas.width != cloud_data[0].length 
+        ))
+    {
+        resize_clouds = true; 
+    } 
 }
 
 function calcDists() {
@@ -148,7 +180,7 @@ function addDot(x,y) {
  
 let prev_angle = 0; 
 function drawPlane() {
-    const img = document.getElementById('plane'); 
+    const img = document.getElementById(selection); 
 
     const CLOSENESS = 10; 
     let x0,x1, y0,y1; 
@@ -238,7 +270,7 @@ function init() {
     }
     
     window.addEventListener("resize", resizeCanvas); 
-    canvas.addEventListener("mousemove", (event) => {
+    window.addEventListener("mousemove", (event) => {
         mouseX = event.clientX;
         mouseY = event.clientY;
     });
